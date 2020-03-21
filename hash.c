@@ -2,8 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include "hash.h"
-#define HASHSIZE 10
-#define EMPTY (-1000)
+#define EMPTY (-1)
 #define EMPTYC "-"
 
 typedef struct comment {
@@ -15,31 +14,33 @@ typedef struct comment {
     int likes;
     int hasReplies;
     int numberOfReplies;
-    // Replies replies; mesmos dados? 
+
 	struct comment *next;
-}Comment, *Hash[HASHSIZE];
+} Comment;
 
 
 void init(Hash hp){
-	int i;
-	for (i=0;i<HASHSIZE;i++){
-		Comment * comment = (Comment *) malloc(sizeof(Comment));
-		comment->id = EMPTYC;
-		comment->user = EMPTYC;
-		comment->date = EMPTYC;
-        comment->timestamp = EMPTY;
-        comment->comments = EMPTYC;
-        comment->likes = EMPTY;
-        comment->hasReplies = EMPTY;
-        comment->numberOfReplies = EMPTY;
-		comment->next = NULL;
-		hp[i] = comment;
+	
+    int i;
+	
+    for (i=0;i<HASHSIZE;i++){
+		Comment * comm = (Comment *) malloc(sizeof(Comment));
+		comm->id = EMPTYC;
+		comm->user = EMPTYC;
+		comm->date = EMPTYC;
+        comm->timestamp = EMPTY;
+        comm->comments = EMPTYC;
+        comm->likes = EMPTY;
+        comm->hasReplies = EMPTY;
+        comm->numberOfReplies = EMPTY;
+		comm->next = NULL;
+		hp[i] = comm;
 	}
 }
 
 
 void displayHash(Hash hp){
-	int i;
+	unsigned i;
 
 	for (i=0;i<HASHSIZE;i++){
 		if (hp[i]!=NULL){;
@@ -56,7 +57,7 @@ void displayHash(Hash hp){
 
 
 int hashCode(char * k){
-    int i, sum=0;
+    unsigned i, sum=0;
     
     for(i=0; i < strlen(k) && k[i]; i++){  sum += k[i]; }
     
@@ -96,7 +97,7 @@ void insert(Hash hp, char * id, char * user, char * date, int timestamp, char * 
 /* Função que dá o free da tabela Hash */
 void freeHash(Hash hp){
 	
-	int i;
+	unsigned int i;
 	Comment * atual;
 	Comment * prev;
 	for (i=0;i<HASHSIZE;i++){
