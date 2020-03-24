@@ -1,16 +1,29 @@
 %{
-/* Declaracoes C diversas */
 #include "hash.h"
+
 %}
 
+%x POST
+
 %%
+
+("\<li class=\"post\"")                 {printf("Hello\n");}
+
+
+
+.|\n    {;}
 
 
 %%
 int yywrap(){ return(1); }
 
 int main(){ 
+       // Hash * hash = (Hash *)malloc(sizeof(Hash));
 
-    yylex(); 
-    return 0; 
+       // init(*hash);
+       // displayHash(*hash);
+        
+        yylex(); 
+        return 0; 
 }
+
