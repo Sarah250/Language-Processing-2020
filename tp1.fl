@@ -1,0 +1,16 @@
+%{
+/* Declaracoes C diversas */
+#include "hash.h"
+%}
+
+%%
+
+
+%%
+int yywrap(){ return(1); }
+
+int main(){ 
+
+    yylex(); 
+    return 0; 
+}
