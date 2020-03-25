@@ -1,12 +1,13 @@
-option noyywrap
+AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a-z]|[A-Z]|[0-9]|.|\ )
 %{
 #include "hash.h"
 #include <string.h>
 char *idPost;
-char * username;
+char *username;
+char *dateInfo;
 %}
 
-%x POST POSTID USER USERNAME NOTH
+%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE
 
 %%
 ("\<li class=\"post\"")                         {BEGIN POST;}
@@ -28,10 +29,26 @@ char * username;
 <USERNAME>{
     [A-Za-z]+\"                   {username = strndup(yytext,strlen(yytext)-1);
                                     printf("%s\n",username);
-                                    BEGIN NOTH;
+                                    BEGIN BDATE;
     }
-    .|\n    {;}
+    
 }
+<BDATE>{
+    ("\<a class=\"time-ago\"")    {BEGIN DATE;}
+    .|\n                          {;}
+}
+<DATE>{
+    "title=\""                     {BEGIN DATEINFO;}
+    .|\n                            {;}
+}
+<DATEINFO>{
+    {AlphaNum}+\"                   { dateInfo = strndup(yytext,strlen(yytext)-1);
+                                      printf("%s\n",dateInfo);
+                                      BEGIN NOTH;
+    }
+}
+
+
 <NOTH>{
     .|\n    {;}
 }
