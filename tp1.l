@@ -5,9 +5,11 @@ AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a
 char *idPost;
 char *username;
 char *dateInfo;
+int timestamp;
+char *time;
 %}
 
-%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE
+%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP
 
 %%
 ("\<li class=\"post\"")                         {BEGIN POST;}
@@ -33,6 +35,7 @@ char *dateInfo;
     }
     
 }
+
 <BDATE>{
     ("\<a class=\"time-ago\"")    {BEGIN DATE;}
     .|\n                          {;}
@@ -44,8 +47,14 @@ char *dateInfo;
 <DATEINFO>{
     {AlphaNum}+\"                   { dateInfo = strndup(yytext,strlen(yytext)-1);
                                       printf("%s\n",dateInfo);
-                                      BEGIN NOTH;
+                                      BEGIN TIMESTAMP;
     }
+}
+<TIMESTAMP>{
+    "\>"[0-9]+                      { timestamp = atoi(yytext+1);
+                                    printf("%d\n",timestamp);
+                                        BEGIN NOTH;
+                                        }
 }
 
 
