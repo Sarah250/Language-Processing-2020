@@ -5,17 +5,19 @@ AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a
 char *idPost;
 char *username;
 char *dateInfo;
+char * commentText;
 int timestamp;
-char *time;
+int likes;
+char * likesC;
+int hasReplies;     //0: false, 1: true
 %}
 
-%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP
+%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES LIKES
 
 %%
 ("\<li class=\"post\"")                         {BEGIN POST;}
 <POST>{                                          
     "id="    {BEGIN POSTID;}
-    .|\n    {;}
 }
 <POSTID>{
     "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-2);
@@ -33,7 +35,6 @@ char *time;
                                     printf("%s\n",username);
                                     BEGIN BDATE;
     }
-    
 }
 
 <BDATE>{
@@ -53,10 +54,38 @@ char *time;
 <TIMESTAMP>{
     "\>"[0-9]+                      { timestamp = atoi(yytext+1);
                                     printf("%d\n",timestamp);
-                                        BEGIN NOTH;
-                                        }
+                                        BEGIN BCOMMENT;
+                                    }
 }
 
+<BCOMMENT>{
+    ("\<div class=\"post-body-inner\"\>")   {BEGIN COMMENT;}
+    .|\n    {;}
+}
+
+<COMMENT>{
+    "\<p\>"                     {BEGIN COMMENTTEXT;}   
+    .|\n    {;}
+}
+<COMMENTTEXT>{
+    {AlphaNum}+"\</p\>"         { commentText = strndup(yytext,strlen(yytext)-4);
+                                printf("%s\n", commentText);
+                                BEGIN BLIKES;
+                                }
+}
+
+<BLIKES>{
+    ("\<span class=\"updatable count\" data-role=\"likes\">")    {BEGIN LIKES;}
+    .|\n    {;}
+}
+
+<LIKES>{
+    [0-9]+"\<"                      { likesC = strndup(yytext,strlen(yytext)-1);
+                                    likes = atoi(likesC);
+                                    printf("%d\n",likes);
+                                    BEGIN NOTH;
+    }
+}
 
 <NOTH>{
     .|\n    {;}
