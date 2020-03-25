@@ -3,9 +3,10 @@ option noyywrap
 #include "hash.h"
 #include <string.h>
 char *idPost;
+char * username;
 %}
 
-%x POST POSTID
+%x POST POSTID USER USERNAME NOTH
 
 %%
 ("\<li class=\"post\"")                         {BEGIN POST;}
@@ -14,12 +15,26 @@ char *idPost;
     .|\n    {;}
 }
 <POSTID>{
-    "\"post-"[0-9]*\"    {idPost = strndup(yytext+1,strlen(yytext+1)-2);
-                            printf("%s\n",idPost);
+    "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-2);
+                                printf("%s\n",idPost);
+    }
+    ("\<a class=\"user\"")       { BEGIN USER; }
+    .|\n    {;}
+}
+<USER>{
+    "data-username=\""          {BEGIN USERNAME;}  
+    .|\n    {;}  
+}
+<USERNAME>{
+    [A-Za-z]+\"                   {username = strndup(yytext,strlen(yytext)-1);
+                                    printf("%s\n",username);
+                                    BEGIN NOTH;
     }
     .|\n    {;}
 }
-
+<NOTH>{
+    .|\n    {;}
+}
 .|\n    {;}
 
 
