@@ -1,21 +1,23 @@
 AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a-z]|[A-Z]|[0-9]|.|\ )
 %{
 #include "hash.h"
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
+char * parentName; // resposta a parentName;
 char *idPost;
 char *username;
+char *name;
 char *dateInfo;
-char * commentText;
+char *commentText;
 int timestamp;
 int likes;
 char * likesC;
 int hasReplies;     //0: false, 1: true
 int n = 0;
 Hash * hash;
-%}
-
-%x POST POSTID USER USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES LIKES
-
+%}  
+%x POST POSTID USER BNAME NAME NAMEINFO USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES REPLYBLIKES LIKES PARENT PARENTINFO
 %%
 "\<li class=\"post\""                         {BEGIN POST;}
 
@@ -27,25 +29,57 @@ Hash * hash;
     "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-1);
                                 printf("%s\n",idPost);
     }
-    ("\<a class=\"user\"")       { BEGIN USER; }
+
+    ("class=\"user\"")       { BEGIN USER; }
     .|\n    {;}
 }
 
 <USER>{
-    "data-username=\""          {BEGIN USERNAME;}  
+    "class=\"author\"\>Guest"       { username = strdup(EMPTYC);
+                                      name = strdup(EMPTYC);
+                                      BEGIN BDATE;  
+    }
+    "data-username=\""              {  BEGIN USERNAME;}  
     .|\n    {;}  
 }
 
 <USERNAME>{
     [a-zA-z]+[0-9]*\"                   {username = strndup(yytext,strlen(yytext)-1);
                                     printf("%s\n",username);
-                                    BEGIN BDATE;
+                                    BEGIN BNAME;
     }
 }
 
+<BNAME>{
+    ("data-username=")             {BEGIN NAME;}
+     .|\n    {;} 
+}
+
+<NAME>{
+    "target=\"_blank\"\>"            {BEGIN NAMEINFO;}
+    .|\n    {;}
+}
+
+<NAMEINFO>{
+    {AlphaNum}+"\</a\>"              { name = strndup(yytext,strlen(yytext)-4);
+                                        printf("Name = %s\n",name);
+                                        BEGIN BDATE;
+                                        }
+    .|\n    {;}   
+}
+
 <BDATE>{
-    ("\<a class=\"time-ago\"")    {BEGIN DATE;}
-    .|\n                          {;}
+    "title=\"in reply to\"\>\</i\>"[ ]+         {BEGIN PARENTINFO;}
+    ("\<a class=\"time-ago\"")                  {BEGIN DATE;}
+    .|\n                                        {;}
+}
+
+<PARENTINFO>{
+    {AlphaNum}+"\</a\>"                     { parentName = strndup(yytext,strlen(yytext)-4);
+                                            printf("ParentName = %s\n",parentName);
+                                            BEGIN BDATE;
+    }
+    .|\n                                    {;}
 }
 
 <DATE>{
@@ -96,7 +130,6 @@ Hash * hash;
                                     likes = atoi(likesC);
                                     printf("%d\n",likes);
                                     BEGIN INITIAL;
-                                    insert(*hash,idPost,username,dateInfo,timestamp, commentText,likes,1,0);
     }
 }
 
@@ -113,12 +146,12 @@ int yywrap(){ return(1); }
 int main(){ 
        hash = (Hash *)malloc(sizeof(Hash));
 
-       init(*hash);
+       //init(*hash);
        // displayHash(*hash);
         
         yylex(); 
         printf("Number of posts = %d\n",n);
         //displayHash(*hash);
-        freeHash(*hash);
+        //freeHash(*hash);
         return 0; 
 }

@@ -1,4 +1,6 @@
 #define HASHSIZE 10
+#define EMPTY (-1)
+#define EMPTYC "-"
 
 typedef struct comment *Hash[HASHSIZE];
 

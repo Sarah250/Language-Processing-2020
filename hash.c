@@ -2,8 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include "hash.h"
-#define EMPTY (-1)
-#define EMPTYC "-"
+
 
 typedef struct comment {
     char * id;
