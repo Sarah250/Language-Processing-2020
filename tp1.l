@@ -69,7 +69,7 @@ Hash * hash;
 }
 
 <BDATE>{
-    "title=\"in reply to\"\>\</i\>"[ ]+         {BEGIN PARENTINFO;}
+    "title=\"in reply to\"\>\</i\>"[ ]*             {BEGIN PARENTINFO;}
     ("\<a class=\"time-ago\"")                  {BEGIN DATE;}
     .|\n                                        {;}
 }
