@@ -16,6 +16,8 @@ char * likesC;
 int hasReplies;     //0: false, 1: true
 int n = 0;
 Hash * hash;
+
+
 %}  
 %x POST POSTID USER BNAME NAME NAMEINFO USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES REPLYBLIKES LIKES PARENT PARENTINFO
 %%
@@ -27,7 +29,7 @@ Hash * hash;
 
 <POSTID>{
     "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-1);
-                                printf("%s\n",idPost);
+                                //printf("%s\n",idPost);
     }
 
     ("class=\"user\"")       { BEGIN USER; }
@@ -35,8 +37,10 @@ Hash * hash;
 }
 
 <USER>{
-    "class=\"author\"\>Guest"       { username = strdup(EMPTYC);
-                                      name = strdup(EMPTYC);
+    "class=\"author\"\>Guest"       { username = strdup("Guest");
+                                      name = strdup("Guest");
+                                      //printf("Username = %s\n",username);
+                                      //printf("Name = %s\n",name);
                                       BEGIN BDATE;  
     }
     "data-username=\""              {  BEGIN USERNAME;}  
@@ -45,7 +49,7 @@ Hash * hash;
 
 <USERNAME>{
     [a-zA-z]+[0-9]*\"                   {username = strndup(yytext,strlen(yytext)-1);
-                                    printf("%s\n",username);
+                                    //printf("Username = %s\n",username);
                                     BEGIN BNAME;
     }
 }
@@ -62,7 +66,7 @@ Hash * hash;
 
 <NAMEINFO>{
     {AlphaNum}+"\</a\>"              { name = strndup(yytext,strlen(yytext)-4);
-                                        printf("Name = %s\n",name);
+                                        //printf("Name = %s\n",name);
                                         BEGIN BDATE;
                                         }
     .|\n    {;}   
@@ -76,7 +80,8 @@ Hash * hash;
 
 <PARENTINFO>{
     {AlphaNum}+"\</a\>"                     { parentName = strndup(yytext,strlen(yytext)-4);
-                                            printf("ParentName = %s\n",parentName);
+                                            //printf("ParentName = %s\n",parentName);
+                                            insertReply(*hash,parentName,idPost);
                                             BEGIN BDATE;
     }
     .|\n                                    {;}
@@ -89,14 +94,14 @@ Hash * hash;
 
 <DATEINFO>{
     {AlphaNum}+\"                   { dateInfo = strndup(yytext,strlen(yytext)-1);
-                                      printf("%s\n",dateInfo);
+                                      //printf("Date = %s\n",dateInfo);
                                       BEGIN TIMESTAMP;
     }
 }
 
 <TIMESTAMP>{
     "\>"[0-9]+                      { timestamp = atoi(yytext+1);
-                                    printf("%d\n",timestamp);
+                                    //printf("Timestamp = %d\n",timestamp);
                                         BEGIN BCOMMENT;
                                     }
       .|\                           {;}                              
@@ -115,7 +120,7 @@ Hash * hash;
 
 <COMMENTTEXT>{
     {AlphaNum}+"\<"[/]*[a-z]+"\>"         { commentText = strndup(yytext,strlen(yytext)-4);
-                                printf("%s\n", commentText);
+                                //printf("commentText = %s\n", commentText);
                                 BEGIN BLIKES;
                                 }
 }
@@ -128,7 +133,8 @@ Hash * hash;
 <LIKES>{
     [0-9]+"\<"                      { likesC = strndup(yytext,strlen(yytext)-1);
                                     likes = atoi(likesC);
-                                    printf("%d\n",likes);
+                                    //printf("Likes = %d\n",likes);
+                                    insert(*hash,idPost,username,name,dateInfo,timestamp,commentText,likes);
                                     BEGIN INITIAL;
     }
 }
@@ -144,14 +150,13 @@ Hash * hash;
 int yywrap(){ return(1); }
 
 int main(){ 
-       hash = (Hash *)malloc(sizeof(Hash));
+        hash = (Hash *)malloc(sizeof(Hash));
 
-       //init(*hash);
-       // displayHash(*hash);
-        
+        init(*hash);
+
         yylex(); 
-        printf("Number of posts = %d\n",n);
-        //displayHash(*hash);
+        printf("\n +++++++++ Hash ++++++++++++\n");
+        displayHash(*hash);
         //freeHash(*hash);
         return 0; 
 }
