@@ -1,9 +1,7 @@
 AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a-z]|[A-Z]|[0-9]|.|\ )
 %{
 #include "hash.h"
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
+
 char * parentName; // resposta a parentName;
 char *idPost;
 char *username;
@@ -29,7 +27,7 @@ Hash * hash;
 
 <POSTID>{
     "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-1);
-                                //printf("%s\n",idPost);
+                                //printf("IdPost = %s\n",idPost);
     }
 
     ("class=\"user\"")       { BEGIN USER; }
@@ -49,8 +47,8 @@ Hash * hash;
 
 <USERNAME>{
     [a-zA-z]+[0-9]*\"                   {username = strndup(yytext,strlen(yytext)-1);
-                                    //printf("Username = %s\n",username);
-                                    BEGIN BNAME;
+                                        //printf("Username = %s\n",username);
+                                        BEGIN BNAME;
     }
 }
 
@@ -73,15 +71,15 @@ Hash * hash;
 }
 
 <BDATE>{
-    "title=\"in reply to\"\>\</i\>"[ ]*             {BEGIN PARENTINFO;}
+    "title=\"in reply to\"\>\</i\>"[ ]*         {BEGIN PARENTINFO;}
     ("\<a class=\"time-ago\"")                  {BEGIN DATE;}
     .|\n                                        {;}
 }
 
 <PARENTINFO>{
-    {AlphaNum}+"\</a\>"                     { parentName = strndup(yytext,strlen(yytext)-4);
-                                            //printf("ParentName = %s\n",parentName);
-                                            insertReply(*hash,parentName,idPost);
+    {AlphaNum}+"\</a\>"                     { parentName = strndup(yytext+1,strlen(yytext)-5);
+                                            //printf("ParentName =_%s_\n",parentName);
+                                            insertReply(*hash,parentName,n-1);
                                             BEGIN BDATE;
     }
     .|\n                                    {;}
@@ -156,7 +154,8 @@ int main(){
 
         yylex(); 
         printf("\n +++++++++ Hash ++++++++++++\n");
-        displayHash(*hash);
+        //displayHash(*hash);
+        creatingJsonFile(*hash);
         //freeHash(*hash);
         return 0; 
 }

@@ -1,6 +1,8 @@
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "hash.h"
 
 
@@ -14,7 +16,8 @@ typedef struct comment {
     int likes;
     int hasReplies;
     int numberOfReplies;
-	char ** idReplies;
+	int *replies;
+	//char ** idReplies;
 } Comment;
 
 int idHash;
@@ -36,7 +39,9 @@ void init(Hash hp){
         comm->likes = EMPTY;
         comm->hasReplies = 0;
         comm->numberOfReplies = 0;
-		comm->idReplies = (char**)malloc(sizeof(char*)*10);
+		comm->replies = (int *)malloc(sizeof(int)*10);
+		int j ;
+		for(j= 0; j<10;j++) comm->replies[j]=EMPTY;
 		hp[i] = comm;
 	}
 }
@@ -46,21 +51,15 @@ void displayHash(Hash hp){
 
 	for (i=0;i<HASHSIZE;i++){
 		if (hp[i]!=NULL){;
-			printf("hp[%d] - Id comment = %s , User = %s , Name = %s ,Date = %s, timestamp = %d ,comments = %s,likes = %d, hasReplies = %d, numberOfReplies = %d\n",i,hp[i]->id,hp[i]->user, hp[i]->nameUser,hp[i]->date, hp[i]->timestamp,hp[i]->comments,hp[i]->likes,hp[i]->hasReplies,hp[i]->numberOfReplies);
+			printf("hp[%d] - Id comment = %s , User = %s , Name =%s,Date = %s, timestamp = %d ,comments = %s,likes = %d, hasReplies = %d, numberOfReplies = %d\n",i,hp[i]->id,hp[i]->user, hp[i]->nameUser,hp[i]->date, hp[i]->timestamp,hp[i]->comments,hp[i]->likes,hp[i]->hasReplies,hp[i]->numberOfReplies);
 				int j = 0;
-				while(hp[i]->idReplies[j]!=NULL) printf("--IdReply = %s\n",hp[i]->idReplies[j++]);
+				//while(hp[i]->idReplies[j]!=NULL) printf("--IdReply = %s\n",hp[i]->idReplies[j++]);
+				while(hp[i]->replies[j]!=EMPTY) printf("--IdReply = %d\n",hp[i]->replies[j++]);
 		}
 		else fprintf(stderr, "Pointer é null\n");
 	}
 } 
 
-int hashCode(char * k){
-    unsigned i, sum=0;
-    
-    for(i=0; i < strlen(k) && k[i]; i++){  sum += k[i]; }
-    
-    return (sum%HASHSIZE);
-}
 
 void insert(Hash hp, char * id, char * user, char* nameUser, char * date, int timestamp, char * comments, int likes){
 
@@ -77,15 +76,15 @@ void insert(Hash hp, char * id, char * user, char* nameUser, char * date, int ti
 	}
 }
 
-void insertReply(Hash hp, char* nameUser, char * idPost){
-	int i = idHash-2;
+void insertReply(Hash hp, char* nameUser, int idPost){
+	int i = idHash-1;
 	int flag = 0;
 
 	while(i>=0 && !flag){
-		if (strstr(nameUser,hp[i]->nameUser)!= NULL){
+		if (strcmp(nameUser,hp[i]->nameUser)== 0){
 			int j = 0;
-			while(hp[i]->idReplies[j]!=NULL) j++;
-			hp[i]->idReplies[j] = idPost;
+			while(hp[i]->replies[j]!=EMPTY) j++;
+			hp[i]->replies[j] = idPost;
 			hp[i]->hasReplies = 1;
 			hp[i]->numberOfReplies++;
 			flag = 1;
@@ -93,6 +92,53 @@ void insertReply(Hash hp, char* nameUser, char * idPost){
 		else i--;
 	}
 }
+
+void creatingReplies(Hash hp, int i, FILE *f){
+	
+	fprintf(f,"\t{\"id\" : \" %s \",\n", hp[i]->id);
+	fprintf(f,"\t\"user\": \"%s\",\n", hp[i]->user);
+	fprintf(f,"\t\"date\": \"%s\",\n", hp[i]->date);
+	fprintf(f,"\t\"timestamp\": %d,\n", hp[i]->timestamp);
+	//fprintf(f,"\t\"commentText\": \"%s\",\n", hp[i]->comments);
+	fprintf(f,"\t\"likes\": %d \n\t}", hp[i]->likes);
+}
+
+void creatingJsonFile(Hash hp){
+	FILE * f = fopen("tp1_ex5_g19.json","w");
+	int i;
+
+	fprintf(f,"{\"commentThread\": [\n");
+
+	for(i=0; i < HASHSIZE; i++){
+		
+		fprintf(f,"{\n");
+		fprintf(f,"\"id\" : \" %s \",\n", hp[i]->id);
+		fprintf(f,"\"user\": \"%s\",\n", hp[i]->user);
+		fprintf(f,"\"date\": \"%s\",\n", hp[i]->date);
+		fprintf(f,"\"timestamp\": %d,\n", hp[i]->timestamp);
+		fprintf(f,"\"commentText\": \"%s\",\n", hp[i]->comments);
+		fprintf(f,"\"likes\": %d,\n", hp[i]->likes);
+		
+		if (hp[i]->hasReplies != 0){
+			int j = 0;
+			fprintf(f, "\"hasReplies\": true,\n");
+			fprintf(f,"\"replies\":[\n");
+			while(hp[i]->replies[j]!= EMPTY) {
+				creatingReplies(hp, hp[i]->replies[j++],f);
+				if (hp[i]->replies[j] != EMPTY) fprintf(f,",\n");
+			}
+			fprintf(f,"\n]\n");
+		} 
+		else {
+			fprintf(f, "\"hasReplies\": false,\n");
+			fprintf(f,"\"replies\": null\n");
+		}
+		fprintf(f,"}");
+		if ( !(i == HASHSIZE-1)) fprintf(f,",\n");
+	}
+	fprintf(f,"\n]}");
+}
+
 
 /* 
 void freeHash(Hash hp){
