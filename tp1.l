@@ -12,33 +12,28 @@ char * commentTemp;
 int timestamp;
 int likes;
 char * likesC;
-int hasReplies;     //0: false, 1: true
 int n = 0;
 Hash * hash;
-char * b = "<b>";
-char * btemp;
-
-
-
 
 %}  
-%x POST POSTID USER BNAME NAME NAMEINFO USERNAME NOTH BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES REPLYBLIKES LIKES PARENT PARENTINFO
+%x POST POSTID USER BNAME NAME NAMEINFO USERNAME BDATE DATEINFO DATE TIMESTAMP BCOMMENT COMMENT COMMENTTEXT BLIKES REPLYBLIKES LIKES PARENT PARENTINFO
 %%
 "\<li class=\"post\""                         {BEGIN POST;}
 
 <POST>{                                          
-    "id="    {n++; 
-                commentTemp = (char*)malloc(sizeof(char)*1500);
-                BEGIN POSTID;}
+    "id="       {   n++; 
+                    commentTemp = (char*)malloc(sizeof(char)*1500);
+                    BEGIN POSTID;
+                }
 }
 
 <POSTID>{
-    "\"post-"[0-9]*\"           {idPost = strndup(yytext+1,strlen(yytext+1)-1);
-                                //printf("IdPost = %s\n",idPost);
-    }
+    "\"post-"[0-9]*\"           {   idPost = strndup(yytext+1,strlen(yytext+1)-1);
+                                    //printf("IdPost = %s\n",idPost);
+                                }
 
-    ("class=\"user\"")       { BEGIN USER; }
-    .|\n    {;}
+    ("class=\"user\"")          { BEGIN USER; }
+    .|\n                        {;}
 }
 
 <USER>{
@@ -49,33 +44,33 @@ char * btemp;
                                       BEGIN BDATE;  
     }
     "data-username=\""              {  BEGIN USERNAME;}  
-    .|\n    {;}  
+    .|\n                            {;}  
 }
 
 <USERNAME>{
-    ([a-zA-z]|[0-9])+\"                   {username = strndup(yytext,strlen(yytext)-1);
-                                        //printf("Username = %s\n",username);
-                                        BEGIN BNAME;
-    }
-     .|\n    {;}  
+    ([a-zA-z]|[0-9])+\"                   { username = strndup(yytext,strlen(yytext)-1);
+                                            //printf("Username = %s\n",username);
+                                            BEGIN BNAME;
+                                          }
+     .|\n                               {;}  
 }
 
 <BNAME>{
-    ("data-username=")             {BEGIN NAME;}
-     .|\n    {;} 
+    ("data-username=")              {BEGIN NAME;}
+     .|\n                           {;} 
 }
 
 <NAME>{
     "target=\"_blank\"\>"            {BEGIN NAMEINFO;}
-    .|\n    {;}
+    .|\n                             {;}
 }
 
 <NAMEINFO>{
-    {AlphaNum}+"\</a\>"              { name = strndup(yytext,strlen(yytext)-4);
+    {AlphaNum}+"\</a\>"              {  name = strndup(yytext,strlen(yytext)-4);
                                         //printf("Name = %s\n",name);
                                         BEGIN BDATE;
-                                        }
-    .|\n    {;}   
+                                     }
+    .|\n                             {;}   
 }
 
 <BDATE>{
@@ -85,29 +80,29 @@ char * btemp;
 }
 
 <PARENTINFO>{
-    {AlphaNum}+"\</a\>"                     { parentName = strndup(yytext+1,strlen(yytext)-5);
-                                            //printf("ParentName =_%s_\n",parentName);
-                                            insertReply(*hash,parentName,n-1);
-                                            BEGIN BDATE;
-    }
+    {AlphaNum}+"\</a\>"                     {   parentName = strndup(yytext+1,strlen(yytext)-5);
+                                                //printf("ParentName =_%s_\n",parentName);
+                                                insertReply(*hash,parentName,n-1);
+                                                BEGIN BDATE;
+                                            }
     .|\n                                    {;}
 }
 
 <DATE>{
-    "title=\""                     {BEGIN DATEINFO;}
+    "title=\""                      {BEGIN DATEINFO;}
     .|\n                            {;}
 }
 
 <DATEINFO>{
-    {AlphaNum}+\"                   { dateInfo = strndup(yytext,strlen(yytext)-1);
-                                      //printf("Date = %s\n",dateInfo);
-                                      BEGIN TIMESTAMP;
-    }
+    {AlphaNum}+\"                   {   dateInfo = strndup(yytext,strlen(yytext)-1);
+                                        //printf("Date = %s\n",dateInfo);
+                                        BEGIN TIMESTAMP;
+                                    }
 }
 
 <TIMESTAMP>{
-    "\>"[0-9]+                      { timestamp = atoi(yytext+1);
-                                    //printf("Timestamp = %d\n",timestamp);
+    "\>"[0-9]+                      {   timestamp = atoi(yytext+1);
+                                        //printf("Timestamp = %d\n",timestamp);
                                         BEGIN BCOMMENT;
                                     }
       .|\                           {;}                              
@@ -119,50 +114,38 @@ char * btemp;
 }
 
 <COMMENT>{
-    "\<p\>"*                     {BEGIN COMMENTTEXT;}   
-    "\<b\>"*                     {BEGIN COMMENTTEXT;} 
-    .|\n                        {;}
+    "\<"[a-z]"\>"                     {BEGIN COMMENTTEXT;}   
+    
+    .|\n                         {;}
 }
 
 <COMMENTTEXT>{
 
-    "\<p\>"                                   {strcat(commentTemp,"");}
+    "\<p\>"                                   {strcat(commentTemp," ");}
 
-    "\</p\>"                                  {strcat(commentTemp,"");}
+    "\</"[a-z]"\>"                            {strcat(commentTemp,"");}
 
-    "\<u\>"                                   {strcat(commentTemp,"");}
+    "\<"[a-z]"\>"                             {strcat(commentTemp,"");}
 
-    "\</u\>"                                    {strcat(commentTemp,"");}
+    "\<br\>"                                  {strcat(commentTemp,"");}
 
-    "\<b\>"                                 {strcat(commentTemp,"");}
-
-    "\</b\>"                                 {strcat(commentTemp,"");}
-
-    "\<br\>"                                {strcat(commentTemp,"");}
-
-    "\</br\>"                                {strcat(commentTemp,"");}
-
-    "\<i\>"                                 {strcat(commentTemp,"");}
-
-    "\</i\>"                                    {strcat(commentTemp,"");}
+    "\</br\>"                                 {strcat(commentTemp,"");}
 
     "�&nbsp;"                                 {strcat(commentTemp,"a");}
 
-    "\""                                    {strcat(commentTemp,"");}
+    "\""                                      {strcat(commentTemp,"");}
 
-
-
-    {AlphaNum}                              {strcat(commentTemp,yytext);}
+    {AlphaNum}                                {strcat(commentTemp,yytext);}
                                         
-    "\</div\>"                      {   commentText = strdup(commentTemp);
-                                                //printf("commentText = %s\n---", commentText);    
-                                                BEGIN BLIKES;
-                                            }
+    "\</div\>"                                {   commentText = strdup(commentTemp);
+                                                 //printf("commentText = %s\n---", commentText);    
+                                                 BEGIN BLIKES;
+                                              }
 }
 
 <BLIKES>{
     ("\<span class=\"updatable count\" data-role=\"likes\">")    {BEGIN LIKES;}
-    .|\n    {;}
+    .|\n                                                         {;}
 }
 
 <LIKES>{
@@ -172,10 +155,6 @@ char * btemp;
                                     insert(*hash,idPost,username,name,dateInfo,timestamp,commentText,likes);
                                     BEGIN INITIAL;
     }
-}
-
-<NOTH>{
-    .|\n    {;}
 }
 
 .|\n    {;}
