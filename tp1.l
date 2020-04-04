@@ -132,15 +132,14 @@ char * btemp;
 
     "\<b\>"                                 {strcat(commentTemp,"");}
 
-    "\<br\>"                                  {strcat(commentTemp,"");}
+    "\<br\>"                                {strcat(commentTemp,"");}
 
     {AlphaNum}                              {strcat(commentTemp,yytext);}
                                         
-    "\<"[/]*[a-z]+"\>"                  {   
-                                            commentText = strdup(commentTemp);
-                                            printf("commentText = %s\n---", commentText);    
-                                            BEGIN BLIKES;
-                                        }
+    "\<"[/]*[a-z]+"\>"                      {   commentText = strdup(commentTemp);
+                                                //printf("commentText = %s\n---", commentText);    
+                                                BEGIN BLIKES;
+                                            }
 }
 
 <BLIKES>{
@@ -180,6 +179,6 @@ int main(){
        
         creatingJsonFile(*hash);
        
-        //freeHash(*hash);
+        freeHash(*hash);
         return 0; 
 }
