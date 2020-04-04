@@ -121,7 +121,6 @@ Hash * hash;
                                 //printf("commentText = %s\n", commentText);
                                 BEGIN BLIKES;
                                 }
-    �&nbsp;
 }
 
 <BLIKES>{
