@@ -126,17 +126,35 @@ char * btemp;
 
 <COMMENTTEXT>{
 
-    "�&nbsp;"                               {strcat(commentTemp,"à");}
+    "\<p\>"                                   {strcat(commentTemp,"");}
 
-    "\""                                    {strcat(commentTemp,"");}
+    "\</p\>"                                  {strcat(commentTemp,"");}
+
+    "\<u\>"                                   {strcat(commentTemp,"");}
+
+    "\</u\>"                                    {strcat(commentTemp,"");}
 
     "\<b\>"                                 {strcat(commentTemp,"");}
 
+    "\</b\>"                                 {strcat(commentTemp,"");}
+
     "\<br\>"                                {strcat(commentTemp,"");}
+
+    "\</br\>"                                {strcat(commentTemp,"");}
+
+    "\<i\>"                                 {strcat(commentTemp,"");}
+
+    "\</i\>"                                    {strcat(commentTemp,"");}
+
+    "�&nbsp;"                                 {strcat(commentTemp,"a");}
+
+    "\""                                    {strcat(commentTemp,"");}
+
+
 
     {AlphaNum}                              {strcat(commentTemp,yytext);}
                                         
-    "\<"[/]*[a-z]+"\>"                      {   commentText = strdup(commentTemp);
+    "\</div\>"                      {   commentText = strdup(commentTemp);
                                                 //printf("commentText = %s\n---", commentText);    
                                                 BEGIN BLIKES;
                                             }
@@ -169,16 +187,13 @@ char * btemp;
 int yywrap(){ return(1); }
 
 int main(){ 
-        hash = (Hash *)malloc(sizeof(Hash));
+    
+    hash = (Hash *)malloc(sizeof(Hash));
 
-        init(*hash);
-        yylex(); 
-       
-        //printf("\n +++++++++ Hash ++++++++++++\n");
-        //displayHash(*hash);
-       
-        creatingJsonFile(*hash);
-       
-        freeHash(*hash);
-        return 0; 
+    init(*hash);
+    yylex();
+    creatingJsonFile(*hash);
+    freeHash(*hash);
+    
+    return 0; 
 }

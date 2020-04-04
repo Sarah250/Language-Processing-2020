@@ -24,10 +24,12 @@ typedef struct comment {
 int idHash;
 
 
+
 void init(Hash hp){
 	
     int i;
 	idHash = 0;
+
 	
     for (i=0;i<HASHSIZE;i++){
 		Comment * comm = (Comment *) malloc(sizeof(Comment));
@@ -62,7 +64,6 @@ void displayHash(Hash hp){
 	}
 } 
 
-
 void insert(Hash hp, char * id, char * user, char* nameUser, char * date, int timestamp, char * comments, int likes){
 
 	int key = idHash++;
@@ -81,7 +82,9 @@ void insert(Hash hp, char * id, char * user, char* nameUser, char * date, int ti
 void insertReply(Hash hp, char* nameUser, int idPost){
 	int i = idHash-1;
 	int flag = 0;
+	
 	hp[idPost]->isPrincipal = 0;
+	
 	while(i>=0 && !flag){
 		if (strcmp(nameUser,hp[i]->nameUser)== 0){
 			int j = 0;
@@ -158,15 +161,13 @@ void creatingJsonFile(Hash hp){
 				fprintf(f,"\"replies\": null\n");
 			}
 			fprintf(f,"}");
-			if ( !(i == HASHSIZE-1)) fprintf(f,",\n");
+			if ( i != 37 ) fprintf(f,",\n");
 		}
 		
 	}
 	fprintf(f,"\n]}");
 }
 
-
- 
 void freeHash(Hash hp){
 	
 	unsigned int i;
