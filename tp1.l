@@ -8,12 +8,17 @@ char *username;
 char *name;
 char *dateInfo;
 char *commentText;
+char * commentTemp;
 int timestamp;
 int likes;
 char * likesC;
 int hasReplies;     //0: false, 1: true
 int n = 0;
 Hash * hash;
+char * b = "<b>";
+
+
+
 
 
 %}  
@@ -22,7 +27,9 @@ Hash * hash;
 "\<li class=\"post\""                         {BEGIN POST;}
 
 <POST>{                                          
-    "id="    {n++; BEGIN POSTID;}
+    "id="    {n++; 
+                commentTemp = (char*)malloc(sizeof(char)*1500);
+                BEGIN POSTID;}
 }
 
 <POSTID>{
@@ -118,10 +125,15 @@ Hash * hash;
 }
 
 <COMMENTTEXT>{
-    {AlphaNum}                           { commentText = strdup(yytext);
-                                        printf("commentText = %s\n---", commentText);
+    {AlphaNum}|\n                           {   
+                                                strcat(commentTemp,yytext);
+                                            
+                                            }
+    "\<"[/]*[a-z]+"\>"                  {   
+                                            commentText = strndup(commentTemp,strlen(commentTemp));
+                                            printf("commentText = %s\n---", commentText);    
+                                            BEGIN BLIKES;
                                         }
-    "\<"[/]*[a-z]+"\>"                  {BEGIN BLIKES;}
 }
 
 <BLIKES>{
@@ -146,17 +158,21 @@ Hash * hash;
 
 
 %%
+
+
 int yywrap(){ return(1); }
 
 int main(){ 
         hash = (Hash *)malloc(sizeof(Hash));
 
         init(*hash);
-
         yylex(); 
-        printf("\n +++++++++ Hash ++++++++++++\n");
+       
+        //printf("\n +++++++++ Hash ++++++++++++\n");
         //displayHash(*hash);
+       
         creatingJsonFile(*hash);
+       
         //freeHash(*hash);
         return 0; 
 }
