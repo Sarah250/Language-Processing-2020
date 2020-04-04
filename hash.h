@@ -10,3 +10,4 @@ void insert(Hash hp, char * id, char * user, char* nameUser, char * date, int ti
 void freeHash(Hash hp);
 void insertReply(Hash hp, char* nameUser, int idPost);
 void creatingJsonFile(Hash hp);
+void freeHash(Hash hp);
