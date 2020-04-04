@@ -18,7 +18,6 @@ typedef struct comment {
     int numberOfReplies;
 	int *replies;
 	int isPrincipal;
-	//char ** idReplies;
 } Comment;
 
 int idHash;
