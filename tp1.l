@@ -1,4 +1,6 @@
 AlphaNum   (Á|À|Â|Ã|á|à|â|ã|É|Ê|é|ê|Í|í|Ó|Ô|ó|õ|ô|Ú|ú|ç|[a-z]|[A-Z]|[0-9]|.|\ )
+acentos    \xc3[\x80-\xbf]       
+letra      [a-zA-Z]|{acentos}   
 %{
 #include "hash.h"
 
@@ -50,6 +52,7 @@ Hash * hash;
                                         //printf("Username = %s\n",username);
                                         BEGIN BNAME;
     }
+    .|\n    {;} 
 }
 
 <BNAME>{
@@ -111,16 +114,18 @@ Hash * hash;
 }
 
 <COMMENT>{
-    "\<p\>"                     {BEGIN COMMENTTEXT;}   
-    "\<b\>"                     {BEGIN COMMENTTEXT;} 
+    "\<div\>\<p\>"                     {BEGIN COMMENTTEXT;}   
+    "\<div\>\<b\>"                     {BEGIN COMMENTTEXT;} 
     .|\n                        {;}
 }
 
 <COMMENTTEXT>{
-    {AlphaNum}+"\<"[/]*[a-z]+"\>"         { commentText = strndup(yytext,strlen(yytext)-4);
-                                //printf("commentText = %s\n", commentText);
-                                BEGIN BLIKES;
-                                }
+    .                         { commentText = strndup(yytext,strlen(yytext)-4);
+                                            printf("commentText = %s\n!!!!", commentText);
+                                            
+                                            }
+    "\<"[/]*[a-z]+"\>"      { BEGIN COMMENTTEXT;}
+    .|\n                        {;}
 }
 
 <BLIKES>{
