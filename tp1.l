@@ -46,10 +46,11 @@ Hash * hash;
 }
 
 <USERNAME>{
-    [a-zA-z]+[0-9]*\"                   {username = strndup(yytext,strlen(yytext)-1);
+    ([a-zA-z]|[0-9])+\"                   {username = strndup(yytext,strlen(yytext)-1);
                                         //printf("Username = %s\n",username);
                                         BEGIN BNAME;
     }
+     .|\n    {;}  
 }
 
 <BNAME>{
@@ -117,10 +118,10 @@ Hash * hash;
 }
 
 <COMMENTTEXT>{
-    {AlphaNum}+"\<"[/]*[a-z]+"\>"         { commentText = strndup(yytext,strlen(yytext)-4);
-                                //printf("commentText = %s\n", commentText);
-                                BEGIN BLIKES;
-                                }
+    {AlphaNum}                           { commentText = strdup(yytext);
+                                        printf("commentText = %s\n---", commentText);
+                                        }
+    "\<"[/]*[a-z]+"\>"                  {BEGIN BLIKES;}
 }
 
 <BLIKES>{
