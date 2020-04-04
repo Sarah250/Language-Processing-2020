@@ -16,7 +16,7 @@ int hasReplies;     //0: false, 1: true
 int n = 0;
 Hash * hash;
 char * b = "<b>";
-
+char * btemp;
 
 
 
@@ -125,12 +125,19 @@ char * b = "<b>";
 }
 
 <COMMENTTEXT>{
-    {AlphaNum}|\n                           {   
-                                                strcat(commentTemp,yytext);
-                                            
-                                            }
+
+    "�&nbsp;"                               {strcat(commentTemp,"à");}
+
+    "\""                                    {strcat(commentTemp,"");}
+
+    "\<b\>"                                 {strcat(commentTemp,"");}
+
+    "\<br\>"                                  {strcat(commentTemp,"");}
+
+    {AlphaNum}                              {strcat(commentTemp,yytext);}
+                                        
     "\<"[/]*[a-z]+"\>"                  {   
-                                            commentText = strndup(commentTemp,strlen(commentTemp));
+                                            commentText = strdup(commentTemp);
                                             printf("commentText = %s\n---", commentText);    
                                             BEGIN BLIKES;
                                         }
