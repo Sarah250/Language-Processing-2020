@@ -101,6 +101,7 @@ void creatingReplies(Hash hp, int i, FILE *f, char * tab){
 	
 	fprintf(f,"%s{\"id\" : \"%s\",\n",tab, hp[i]->id);
 	fprintf(f,"%s\"user\": \"%s\",\n",tab, hp[i]->user);
+	fprintf(f,"%s\"name\": \"%s\",\n",tab, hp[i]->nameUser);
 	fprintf(f,"%s\"date\": \"%s\",\n",tab, hp[i]->date);
 	fprintf(f,"%s\"timestamp\": %d,\n",tab, hp[i]->timestamp);
 	fprintf(f,"%s\"commentText\": \"%s\",\n",tab, hp[i]->comments);
@@ -138,6 +139,7 @@ void creatingJsonFile(Hash hp){
 			fprintf(f,"{\n");
 			fprintf(f,"\"id\" : \"%s\",\n", hp[i]->id);
 			fprintf(f,"\"user\": \"%s\",\n", hp[i]->user);
+			fprintf(f,"\"name\": \"%s\",\n", hp[i]->nameUser);
 			fprintf(f,"\"date\": \"%s\",\n", hp[i]->date);
 			fprintf(f,"\"timestamp\": %d,\n", hp[i]->timestamp);
 			fprintf(f,"\"commentText\": \"%s\",\n", hp[i]->comments);
