@@ -161,8 +161,6 @@ Hash * hash;
 
 
 %%
-
-
 int yywrap(){ return(1); }
 
 int main(){ 
