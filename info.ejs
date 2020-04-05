@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <style>
+            div {
+                border: 3px solid grey;
+                font: normal 16px Georgia, sans-serif;
+            }
+            body {
+                background-color: rgb(135, 160, 180);
+                font: normal 16px Roboto, sans-serif;
+            }
+        </style>
+        <meta charset="utf-8">
+        <title>PL 2019/2020</title>
+    </head>
+
+    <body>
+        <div style="background-color:grey;color:black;padding:20px;outline: solid black;">
+            <h1>Comment Thread - Transformador Sol2NetLang</h1>
+        </div>
+        <% const commentHandle = (post) => {
+            let content = "";
+
+            if(post.hasReplies) {
+                content += '<ul>';
+                post.replies.forEach(reply => {
+                    content += `<li><h4><u>${reply.user} (${reply.name})</u></h4> ${reply.date}<p><div>${reply.commentText}</div></p><strong>Likes:</strong> ${reply.likes}</li>`;
+
+                    if(reply.hasReplies) {
+                        content += commentHandle(reply);
+                    }
+                })
+                content += '</ul>';
+            }
+            return content;
+        } %>
+
+        <% commentThread.forEach(thread => { %>
+            <p><h3><u><%= thread.user %> (<%= thread.name %>)</u></h3></p>
+            <p><%= thread.id %></p>
+            <p><%= thread.date %></p>
+            <p><div><%= thread.commentText %></div></p>
+            <p><strong>Likes: </strong><%= thread.likes %></p>
+            <% if(thread.hasReplies) { %>
+                <%- commentHandle(thread)%>
+            <% } %>
+            <hr>
+        <% }); %>
+    </body>
+</html>
