@@ -13,6 +13,9 @@ extern char *yytext;
 int yyerror();
 extern int yylineno;
 
+char str[5] = ".html";
+char num[20];
+int file;
 FILE *fp;
 char* paragraph_concat(char *str1, char *str2);
 %}
@@ -24,8 +27,8 @@ char* paragraph_concat(char *str1, char *str2);
 %token CONCEITO TITULO TITULONOTA STR TRIPLONOME NOMERELACAO NOMECOMPLEMENTO IMAGEM
 %%
 
-Caderno : Caderno Pagina             {  printf("<html>\n<BODY>\n%s\n</BODY>\n</html>\n", $2);}
-        | Pagina                     {  fprintf(fp, "<html>\n<BODY>\n%s\n</BODY>\n</html>\n", $1);}
+Caderno : Caderno Pagina             {  file++; sprintf(num, "%d",file); strcat(num, str); printf("%s", num); fp=fopen(num,"w"); fprintf(fp, "<html>\n<BODY>\n%s\n</BODY>\n</html>\n", $2);}
+        | Pagina                     {  file++; sprintf(num, "%d",file); strcat(num, str); printf("%s", num); fp=fopen(num,"w"); fprintf(fp, "<html>\n<BODY>\n%s\n</BODY>\n</html>\n", $1);}
         ;
 
 Pagina : CONCEITO Documento Triplos             { asprintf(&$$, "<H1>%s</H1>\n%s<P><B>---------TRIPLOS---------</B></P>%s", $1, $2, $3);}
@@ -79,11 +82,11 @@ int yyerror(char *s){
 }
 
 int main(){
-
-  fp=fopen("output.html","w");
+  int file = 0;
+  
   yyparse();
   fclose(fp);
-
+  printf("\n%s\n", str);
   return 0;
 }
 
