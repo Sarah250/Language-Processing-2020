@@ -72,6 +72,6 @@ texto3     {letra}|{simbolos3}|{numeros}
 
 <TRIPLOS>[=]{3}[ ]*                 {  BEGIN INICIO; }
 
-.|\n {;}
+.|\n 								{;}
 
 %%

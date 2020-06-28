@@ -5,7 +5,5 @@ prog: processador.l gramatica.y
 clean: 
 		rm -f lex.yy.c prog y.tab.* *.html
 
-run: prog
-
-run2 : 
+run : 
 		./prog < ex.caderno
