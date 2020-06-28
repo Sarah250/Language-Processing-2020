@@ -1,2 +1,0 @@
-A 1º entrada/Pgina está a imprimir no ficheiro (fprintf) em vez de imprimir na consola
-os restantes nao, imprimem na consola
